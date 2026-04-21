@@ -14,7 +14,7 @@ import { PrescriptionReport } from "@/components/fitting/PrescriptionReport";
 import { useUserStore } from "@/store/useUserStore";
 
 export default function ProfilePage() {
-  const { user, signInMock, isLoading } = useAuthStore();
+  const { user, setAuthDialogOpen, isLoading } = useAuthStore();
   const { setSpec } = useUserStore();
   const [history, setHistory] = useState<SavedReport[]>([]);
   const [selectedReport, setSelectedReport] = useState<SavedReport | null>(null);
@@ -96,7 +96,7 @@ export default function ProfilePage() {
                       계정에 자동으로 안전하게 연동됩니다.
                     </p>
                   </div>
-                  <Button onClick={signInMock} className="w-full h-12 rounded-full bg-primary font-black tracking-widest shadow-lg hover:scale-105 active:scale-95 transition-all">
+                  <Button onClick={() => setAuthDialogOpen(true)} className="w-full h-12 rounded-full bg-primary font-black tracking-widest shadow-lg hover:scale-105 active:scale-95 transition-all">
                     <LogIn className="w-4 h-4 mr-2" />
                     로그인 시작하기
                   </Button>

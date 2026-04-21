@@ -15,9 +15,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AuthDialog } from "./AuthDialog";
 
 export function AuthButton() {
-  const { user, signInMock, signOut, isMock } = useAuthStore();
+  const { user, signOut, setAuthDialogOpen } = useAuthStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -26,44 +27,31 @@ export function AuthButton() {
 
   // 로그인 감지 시 데이터 동기화
   useEffect(() => {
-    if (mounted && user && !isMock) {
+    if (mounted && user) {
       storageService.syncGuestData(user.id);
     }
-  }, [user, isMock, mounted]);
+  }, [user, mounted]);
 
   if (!mounted) return <div className="w-20 h-9 bg-secondary rounded-full animate-pulse" />;
 
   if (!user) {
     return (
       <div className="flex items-center gap-2">
-        {/* Mock 로그인 버튼 (테스트용) */}
         <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={signInMock}
-          className="text-[10px] font-black tracking-tighter text-muted-foreground hover:text-primary h-8"
-        >
-          [MOCK LOGIN]
-        </Button>
-        <Button 
-          onClick={signInMock} // 현재는 Mock으로 연결
+          onClick={() => setAuthDialogOpen(true)}
           size="sm"
           className="rounded-full bg-primary hover:bg-primary/90 text-white font-bold h-9 px-5 shadow-sm"
         >
           <LogIn className="w-4 h-4 mr-2" />
           로그인
         </Button>
+        <AuthDialog />
       </div>
     );
   }
 
   return (
     <div className="flex items-center gap-3">
-      {isMock && (
-        <span className="text-[9px] font-black bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
-          MOCK MODE
-        </span>
-      )}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-10 w-10 rounded-full border-2 border-primary/20 p-0 hover:bg-primary/5 transition-all">
@@ -107,6 +95,10 @@ export function AuthButton() {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      
+      {/* 사용자가 로그인한 상태에서도 다른 탭에서 Dialog가 열렸을 경우를 대비하거나, 구조적으로 하나 유지해둘 수 있음.
+          하지만 Navbar 쪽에서 전역적으로 띄우는 것이 더 좋음. 일단 여기에 둡니다. */}
+      <AuthDialog />
     </div>
   );
 }

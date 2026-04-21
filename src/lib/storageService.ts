@@ -32,7 +32,7 @@ export const storageService = {
       created_at: new Date().toISOString(),
     };
 
-    if (user && !user.isMock) {
+    if (user) {
       // 1-1. 로그인 유저: Supabase 저장
       const { error } = await supabase
         .from('fitting_reports')
@@ -66,7 +66,7 @@ export const storageService = {
 
   // 3. 히스토리 조회
   async getFittingHistory(user: any): Promise<SavedReport[]> {
-    if (user && !user.isMock) {
+    if (user) {
       // Supabase에서 가져오기
       const { data, error } = await supabase
         .from('fitting_reports')

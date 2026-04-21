@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "ShaftMaster — AI 골프 피팅 에이전트",
-    template: "%s | ShaftMaster",
+    default: "샤프트 마스터 — AI 골프 피팅 에이전트",
+    template: "%s | 샤프트 마스터",
   },
   description:
     "스윙 스피드·비거리·핸디캡 데이터를 바탕으로 AI가 최적의 샤프트를 추천해드립니다. 전문 피팅을 온라인으로 경험하세요.",

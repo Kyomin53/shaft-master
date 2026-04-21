@@ -24,10 +24,10 @@ export default function FittingPage() {
             AI 피팅 시스템
           </p>
           <h1 className="text-3xl font-bold tracking-tight gold-text">
-            샤프트 피팅 위저드
+            샤프트 맞춤 추천
           </h1>
           <p className="text-muted-foreground text-sm">
-            5가지 질문으로 당신에게 꼭 맞는 샤프트를 찾아드립니다.
+            5가지 질문으로 당신에게 꼭 맞는 샤프트를 추천해 드립니다.
           </p>
         </div>
 

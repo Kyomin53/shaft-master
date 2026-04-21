@@ -33,8 +33,8 @@ function PrescriptionCard({ data }: { data: ReportData }) {
             <div className="p-2 bg-primary/10 rounded-xl">
               <Trophy className="h-5 w-5 text-primary" />
             </div>
-            <div>
-              <h3 className="text-lg font-bold golf-gradient-text tracking-tight">ShaftMaster 처방전 ⛳</h3>
+            <div className="flex items-center gap-3">
+              <h3 className="text-lg font-bold golf-gradient-text tracking-tight">샤프트 마스터 처방전 ⛳</h3>
               <p className="text-[10px] text-muted-foreground uppercase tracking-widest opacity-70">Personalized Fitting Report</p>
             </div>
           </div>
@@ -100,9 +100,8 @@ function PrescriptionCard({ data }: { data: ReportData }) {
           <Button 
             className="w-full mt-4 bg-slate-900 hover:bg-black text-white h-12 rounded-xl font-bold tracking-tight shadow-lg transition-all hover:scale-[1.02] border border-primary/20"
             onClick={() => {
-              // PrescriptionCard data doesn't have purchaseUrl directly, 
-              // but we can search by model
-              const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(data.model + ' 구매')}`;
+              const query = encodeURIComponent(data.model);
+              const searchUrl = `https://search.shopping.naver.com/search/all?query=${query}`;
               window.open(searchUrl, '_blank');
             }}
           >
@@ -267,27 +266,20 @@ export function ChatInterface() {
       {/* 메시지 영역 */}
       <ScrollArea className="flex-1">
         <div ref={viewportRef} className="space-y-6 max-w-3xl mx-auto p-4 py-6">
-          {/* 빈 상태 */}
+          {/* 빈 상태 (AI 선제 질문) */}
           {messages.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-[45vh] text-center space-y-4">
-            <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
-                <Sparkles className="h-8 w-8 text-primary" />
+            <div className="flex flex-col items-center justify-center h-[50vh] text-center space-y-5 animate-in fade-in zoom-in-95 duration-500">
+              <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center premium-glow shadow-sm">
+                <Bot className="h-8 w-8 text-primary" />
               </div>
-              <div className="space-y-4 text-center">
-                <p className="text-2xl font-black golf-gradient-text tracking-tighter">완벽한 스윙을 완성할<br />단 하나의 샤프트 ⛳</p>
-                <p className="text-sm text-muted-foreground max-w-xs mx-auto leading-relaxed">
-                  비거리(m), 템포, 구질 등을 말씀해 주시면<br />
-                  Gemini AI가 가장 적합한 모델을 처방합니다.
-                </p>
+              <div className="space-y-4 text-center max-w-sm w-full mx-auto">
+                <p className="text-2xl font-black golf-gradient-text tracking-tighter">안녕하세요! 수석 피터입니다 ⛳</p>
+                <div className="text-[13px] text-foreground leading-relaxed bg-white border border-border shadow-sm p-5 rounded-3xl rounded-tl-sm text-left relative">
+                  고객님께 가장 완벽한 샤프트를 찾아드리기 위해 피팅을 시작하겠습니다.<br /><br />
+                  가장 먼저, 평소 <strong>평균 드라이버 비거리</strong>가 어떻게 되시는지 편하게 말씀해 주시겠어요?<br />
+                  <span className="text-muted-foreground mt-2 block text-[11px]">(예: "200m 나갑니다!", "스피드가 95마일 정도 돼요")</span>
+                </div>
               </div>
-              <Button 
-                variant="outline" 
-                size="lg" 
-                className="rounded-full px-8 border-primary/30 text-primary hover:bg-primary hover:text-white transition-all duration-300 transform hover:scale-105"
-                onClick={() => setInput("안녕하세요! 제 드라이버 비거리는 210m 정도입니다.")}
-              >
-                상담 시작하기 ⛳
-              </Button>
             </div>
           )}
 
@@ -299,21 +291,45 @@ export function ChatInterface() {
             let productListData: any[] | null = null;
 
             if (msg.role === "assistant") {
-              const reportMatch = msg.content.match(/---DATA_REPORT---({.*?})/);
-              if (reportMatch) {
+              // _START 및 _END 태그를 이용한 완벽한 파싱 로직
+              const extractBoundaryJSON = (startMarker: string, endMarker: string) => {
+                const startIdx = displayContent.indexOf(startMarker);
+                const endIdx = displayContent.indexOf(endMarker);
+                
+                // 마커가 없거나 시작이 끝보다 뒤에 있으면 실패
+                if (startIdx === -1 || endIdx === -1 || startIdx >= endIdx) return null;
+                
+                // 마커 사이의 순수 JSON 문자열 추출
+                const jsonStr = displayContent.substring(startIdx + startMarker.length, endIdx).trim();
+                let parsedData = null;
+                
                 try {
-                  reportData = JSON.parse(reportMatch[1]);
-                  displayContent = displayContent.replace(/---DATA_REPORT---{.*?}/, "");
-                } catch (e) { console.error("Report parse error", e); }
-              }
+                  // 혹시 모를 마크다운 잔재(```json) 제거
+                  const cleanJsonStr = jsonStr.replace(/```json/gi, "").replace(/```/g, "").trim();
+                  parsedData = JSON.parse(cleanJsonStr);
+                } catch (e) {
+                  console.error(`${startMarker} parse error`, e);
+                }
+                
+                // 마커를 포함한 해당 블록 전체를 텍스트에서 완전히 삭제
+                const stringToRemove = displayContent.substring(startIdx, endIdx + endMarker.length);
+                displayContent = displayContent.replace(stringToRemove, "");
+                
+                return parsedData;
+              };
 
-              const productListMatch = msg.content.match(/---PRODUCT_LIST---(\[.*?\])/);
-              if (productListMatch) {
-                try {
-                  productListData = JSON.parse(productListMatch[1]);
-                  displayContent = displayContent.replace(/---PRODUCT_LIST---\[.*?\]/, "");
-                } catch (e) { console.error("Product list parse error", e); }
-              }
+              reportData = extractBoundaryJSON("---DATA_REPORT_START---", "---DATA_REPORT_END---");
+              productListData = extractBoundaryJSON("---PRODUCT_LIST_START---", "---PRODUCT_LIST_END---");
+              
+              // 혹시 남아있을 수 있는 잔재 지우기
+              displayContent = displayContent.replace(/---DATA_REPORT_START---[\s\S]*?---DATA_REPORT_END---/g, "");
+              displayContent = displayContent.replace(/---PRODUCT_LIST_START---[\s\S]*?---PRODUCT_LIST_END---/g, "");
+              
+              // 이전 버전 마커(fallback용) 잔재 지우기
+              displayContent = displayContent.replace(/---DATA_REPORT---[\s\S]*?}/g, "");
+              displayContent = displayContent.replace(/---PRODUCT_LIST---[\s\S]*?\]/g, "");
+              
+              displayContent = displayContent.trim();
             }
 
             return (

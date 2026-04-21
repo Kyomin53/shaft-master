@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { PrescriptionReport } from "./PrescriptionReport";
 import { GolfLoading } from "../ui/golf-loading";
+import { motion, AnimatePresence } from "framer-motion";
 
 const STEPS = [
   {
@@ -99,7 +100,7 @@ export function FittingWizard() {
     switch (step.id) {
       case "physical":
         return (
-          <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+          <div className="space-y-8">
             <div className="space-y-4">
               <div className="flex justify-between items-end">
                 <Label className="text-sm text-muted-foreground uppercase tracking-widest">신장 (Height)</Label>
@@ -143,7 +144,7 @@ export function FittingWizard() {
 
       case "diagnosis":
         return (
-          <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+          <div className="space-y-6">
             <div className="space-y-3">
               <Label className="text-sm text-muted-foreground tracking-widest uppercase">현재 사용 샤프트 (Current Shaft)</Label>
               <div className="relative">
@@ -191,7 +192,7 @@ export function FittingWizard() {
 
       case "swing":
         return (
-          <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+          <div className="space-y-8">
             <div className="space-y-4">
               <div className="flex justify-between items-baseline mb-2">
                 <Label className="text-sm text-muted-foreground tracking-widest uppercase">드라이버 스윙 스피드 (Swing Speed)</Label>
@@ -237,7 +238,7 @@ export function FittingWizard() {
 
       case "goals":
         return (
-          <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+          <div className="space-y-8">
             <div className="space-y-4">
               <Label className="text-sm text-muted-foreground tracking-widest uppercase">현재 주된 구질 (Ball Flight)</Label>
               <div className="flex gap-2">
@@ -347,8 +348,19 @@ export function FittingWizard() {
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="py-6 min-h-[380px] flex flex-col justify-center relative z-10 px-8">
-        {renderStep()}
+      <CardContent className="py-6 min-h-[380px] flex flex-col justify-center relative z-10 px-8 overflow-hidden">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentStep}
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -30 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="w-full"
+          >
+            {renderStep()}
+          </motion.div>
+        </AnimatePresence>
       </CardContent>
 
       <CardFooter className="flex justify-between border-t border-border/50 pt-8 pb-10 px-8 relative z-10 bg-secondary/20 backdrop-blur-sm">
