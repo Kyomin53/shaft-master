@@ -96,10 +96,9 @@ export async function POST(req: Request) {
       model_candidates: MODEL_NAMES
     }, null, 2));
     
-    // Google AI Provider 설정 (v1 API 사용 명시)
+    // Google AI Provider 설정 (기본값 사용)
     const googleProvider = createGoogleGenerativeAI({
       apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
-      baseURL: 'https://generativelanguage.googleapis.com/v1',
     });
 
 
